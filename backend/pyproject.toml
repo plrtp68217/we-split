@@ -13,3 +13,7 @@ dependencies = [
 
 [tool.fastapi]
 entrypoint = "src.main:app"
+
+[tool.mypy]
+mypy_path = "."
+explicit_package_bases = true
