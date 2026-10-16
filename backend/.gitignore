@@ -1,0 +1,103 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===== Virtual Environments =====
+.venv/
+venv/
+ENV/
+env/
+.conda/
+.python-version
+
+# ===== FastAPI / Uvicorn =====
+# Логи uvicorn
+*.log
+uvicorn.log
+
+# ===== Pytest / Coverage =====
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# ===== mypy / ruff / black =====
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.cache/
+
+# ===== Environment variables =====
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# ===== Databases =====
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3
+*.sql
+!migrations/*.sql
+
+# ===== Alembic =====
+# ВАЖНО: миграции НЕ игнорируем!
+# alembic/versions/*.py — должны быть в git
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== Celery =====
+celerybeat-schedule
+celerybeat.pid
+
+# ===== Docker =====
+# обычно .dockerignore отдельно, но можно и тут
+docker-compose.override.yml
+
+# ===== Frontend (если есть) =====
+node_modules/
+dist/
+.next/

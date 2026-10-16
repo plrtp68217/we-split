@@ -20,30 +20,40 @@
 ## Схема базы данных
 
 ```
-+-----------------------+          +-----------------------+          +-----------------------+
-|         events        | 1 ---< N |      events_users     | N >--- 1 |         users         |
-+-----------------------+          +-----------------------+          +-----------------------+
-| PK id         : int   |          | PK id         : int   |          | PK id         : int   |
-|    name       : str   |          | FK event_id   : int   |          |    name       : str   |
-|    date       : date  |          | FK user_id    : int   |          |    login      : str   |
-| FK author_id  : int   |          +-----------------------+          +-----------------------+
-+-----------------------+
-            | 1                                                                   | 1
-            |                                                                     |
-            | N                                                                   | N
-+-----------------------+                                             +-----------------------+
-|        expenses       |  1 -------------------------------------< N |         debts         |
-+-----------------------+                                             +-----------------------+
-| PK id         : int   |                                             | PK id         : int   |
-|    name       : str   |                                             |    name       : str   |
-|    amount     : int   |                                             | FK debtor_id  : int   |
-| FK payer_id   : int   |                                             | FK expense_id : int   |
-| FK event_id   : int   |                                             |    amount     : int   |
-+-----------------------+                                             |    is_settled : bool  |
-                                                                      +-----------------------+
++-----------------------------+          +-----------------------------+          +-----------------------------+
+|            events           | 1 ---< N |         events_users        | N >--- 1 |            users            |
++-----------------------------+          +-----------------------------+          +-----------------------------+
+| PK    id         : int      |          | PK,FK event_id   : int      |          | PK    id         : int      |
+|       name       : str      |          | PK,FK user_id    : int      |          |       username   : str      |
+|       created_at : datetime |          +-----------------------------+          |       email      : str      |
+|       updated_at : datetime |                                                   |       created_at : datetime |
++-----------------------------+                                                   |       updated_at : datetime |
+                                                                                  +-----------------------------+
+               | 1                                                                               | 1
+               |                                                                                 |
+               | N                                                                               | N
++-----------------------------+                                                   +-----------------------------+
+|           expenses          | 1 --------------------------------------------< N |            debts            |
++-----------------------------+                                                   +-----------------------------+
+| PK    id         : int      |                                                   | PK    id         : int      |
+|       name       : str      |                                                   |       amount     : decimal  |
+|       amount     : decimal  |                                                   |       is_settled : bool     |
+| FK    event_id   : int      |                                                   | FK    debtor_id  : int      |
+| FK    payer_id   : int      |                                                   | FK    expense_id : int      |
+|       created_at : datetime |                                                   +-----------------------------+
+|       updated_at : datetime |
++-----------------------------+
 ```
 
 `PK` — первичный ключ, `FK` — внешний ключ. На диаграмме показаны не все связи с `users`, полный список ниже.
+
+Особенности полей:
+
+- `events_users` — промежуточная таблица (Association Object). Первичный ключ составной: `(event_id, user_id)`, поэтому один пользователь не может попасть в одно мероприятие дважды.
+- `users.email` — уникальный, по `users.username` есть индекс.
+- `amount` в `expenses` и `debts` — `Numeric(10, 2)` (`Decimal` в Python): до 10 цифр, из них 2 после запятой.
+- `debts.is_settled` — погашен ли долг, по умолчанию `false`.
+- `created_at` заполняется при создании записи, `updated_at` — при создании и при каждом изменении.
 
 ## Связи
 
@@ -52,7 +62,6 @@
 | `events` → `events_users` | один-ко-многим | `events_users.event_id` |
 | `users` → `events_users` | один-ко-многим | `events_users.user_id` |
 | `events` ↔ `users` | многие-ко-многим | через таблицу `events_users` |
-| `users` → `events` | один-ко-многим | `events.author_id` |
 | `events` → `expenses` | один-ко-многим | `expenses.event_id` |
 | `users` → `expenses` | один-ко-многим | `expenses.payer_id` |
 | `expenses` → `debts` | один-ко-многим | `debts.expense_id` |
