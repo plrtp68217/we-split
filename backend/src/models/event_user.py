@@ -5,9 +5,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import Base
 
+
 if TYPE_CHECKING:
     from src.models.user import User
     from src.models.event import Event
+
 
 class EventUser(Base):
     __tablename__ = 'events_users'

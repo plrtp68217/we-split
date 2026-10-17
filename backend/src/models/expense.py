@@ -4,7 +4,8 @@ from sqlalchemy import String, Numeric, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from decimal import Decimal
 
-from src.models.base import Base, TimestampMixin
+from src.models.base import Base
+from src.models.mixins.time_stamp import TimestampMixin
 
 
 if TYPE_CHECKING:

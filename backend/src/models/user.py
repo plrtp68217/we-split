@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.models.base import Base, TimestampMixin
+from src.models.base import Base
+from src.models.mixins.time_stamp import TimestampMixin
 
 
 if TYPE_CHECKING:
