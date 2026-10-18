@@ -17,7 +17,7 @@ class User(TimestampMixin, Base):
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    username: Mapped[str] = mapped_column(String(50), index=True)
+    name: Mapped[str] = mapped_column(String(50), index=True)
     email: Mapped[str] = mapped_column(unique=True)
 
     events_users: Mapped[list['EventUser']] = relationship(back_populates='user')
