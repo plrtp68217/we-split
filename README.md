@@ -68,3 +68,5 @@
 | `users` → `debts` | один-ко-многим | `debts.debtor_id` |
 
 Тип связи — это свойство не поля, а пары таблиц.
+
+Порядок при изменении моделей: alembic revision --autogenerate -m "..." → alembic upgrade head.

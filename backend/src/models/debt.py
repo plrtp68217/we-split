@@ -18,8 +18,8 @@ class Debt(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     is_settled: Mapped[bool] = mapped_column(default=False)
 
-    debtor_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    expense_id: Mapped[int] = mapped_column(ForeignKey('expenses.id'))
+    debtor_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
+    expense_id: Mapped[int] = mapped_column(ForeignKey('expenses.id', ondelete='CASCADE'))
 
     debtor: Mapped['User'] = relationship(back_populates='debts')
     expense: Mapped['Expense'] = relationship(back_populates='debts')

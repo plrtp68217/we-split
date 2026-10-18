@@ -22,8 +22,8 @@ class Expense(TimestampMixin, Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id'))
-    payer_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    payer_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
 
     event: Mapped['Event'] = relationship(back_populates='expenses')
     payer: Mapped['User'] = relationship(back_populates='expenses')
-    debts: Mapped[list['Debt']] = relationship(back_populates='expense')
+    debts: Mapped[list['Debt']] = relationship(back_populates='expense', cascade='all, delete-orphan', passive_deletes=True)

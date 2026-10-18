@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class EventUser(Base):
     __tablename__ = 'events_users'
 
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True,)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), primary_key=True,)
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id'), primary_key=True,)
 
     user: Mapped['User'] = relationship(back_populates='events_users')
