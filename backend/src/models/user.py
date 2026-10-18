@@ -20,6 +20,6 @@ class User(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(50), index=True)
     email: Mapped[str] = mapped_column(unique=True)
 
-    events_users: Mapped[list['EventUser']] = relationship(back_populates='user')
-    expenses: Mapped[list['Expense']] = relationship(back_populates='payer')
-    debts: Mapped[list['Debt']] = relationship(back_populates='debtor')
+    events_users: Mapped[list['EventUser']] = relationship(back_populates='user', cascade='all, delete-orphan', passive_deletes=True)
+    expenses: Mapped[list['Expense']] = relationship(back_populates='payer', cascade='all, delete-orphan', passive_deletes=True)
+    debts: Mapped[list['Debt']] = relationship(back_populates='debtor', cascade='all, delete-orphan', passive_deletes=True)
