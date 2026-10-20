@@ -18,5 +18,5 @@ class Event(TimestampMixin, Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50))
 
-    events_users: Mapped[list['EventUser']] = relationship(back_populates='event')
+    events_users: Mapped[list['EventUser']] = relationship(back_populates='event', lazy='selectin')
     expenses: Mapped[list['Expense']] = relationship(back_populates='event')

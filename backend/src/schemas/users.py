@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
 
-class UserResponse(BaseModel):
+class UserRead(BaseModel):
   id: int
   name: str
   email: str
 
-class UserRequest(BaseModel):
+class UserCreate(BaseModel):
   name: str
   email: str
 

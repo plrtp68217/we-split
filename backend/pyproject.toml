@@ -11,10 +11,12 @@ dependencies = [
     "fastapi[standard]>=0.143.2",
     "sqlalchemy[asyncio]>=2.1.4",
 ]
-
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+]
 [tool.fastapi]
 entrypoint = "src.main:app"
-
 [tool.mypy]
-mypy_path = "."
+mypy_path = "$MYPY_CONFIG_FILE_DIR"
 explicit_package_bases = true

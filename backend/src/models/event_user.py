@@ -17,5 +17,5 @@ class EventUser(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), primary_key=True,)
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id'), primary_key=True,)
 
-    user: Mapped['User'] = relationship(back_populates='events_users')
-    event: Mapped['Event'] = relationship(back_populates='events_users')
+    user: Mapped['User'] = relationship(back_populates='events_users', lazy='selectin')
+    event: Mapped['Event'] = relationship(back_populates='events_users', lazy='selectin')
