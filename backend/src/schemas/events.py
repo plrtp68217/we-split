@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class EventRead(BaseModel):
   id: int
   name: str

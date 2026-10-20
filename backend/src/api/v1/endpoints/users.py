@@ -7,16 +7,16 @@ from src.schemas.users import UserRead, UserCreate, UserUpdate
 from src.schemas.events import EventRead
 from src.models import User
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"])
 
-@router.get("/users", response_model=list[UserRead])
+@router.get("/", response_model=list[UserRead])
 async def get_all_users(session: SessionDep):
   users = (await session.scalars(select(User))).all()
 
   return users
 
-@router.get("/users/{user_id}", response_model=UserRead)
-async def get_user_by_user_id(session: SessionDep, user_id: int):
+@router.get("/{user_id}", response_model=UserRead)
+async def get_user(session: SessionDep, user_id: int):
   user = await session.scalar(select(User).where(User.id == user_id))
 
   if user is None:
@@ -24,7 +24,7 @@ async def get_user_by_user_id(session: SessionDep, user_id: int):
 
   return user
 
-@router.get("/users/{user_id}/events", response_model=list[EventRead])
+@router.get("/{user_id}/events", response_model=list[EventRead])
 async def get_events_in_user(session: SessionDep, user_id: int):
   user = await session.scalar(select(User).where(User.id == user_id))
   
@@ -35,7 +35,7 @@ async def get_events_in_user(session: SessionDep, user_id: int):
 
   return events
 
-@router.post("/users",  response_model=UserRead, status_code=201)
+@router.post("/",  response_model=UserRead, status_code=201)
 async def create_user(session: SessionDep, data: UserCreate):
   user = User(**data.model_dump())
   session.add(user)
@@ -45,9 +45,11 @@ async def create_user(session: SessionDep, data: UserCreate):
     await session.rollback()
     raise HTTPException(status_code=409, detail="User with this email already exists")
 
+  await session.refresh(user)
+
   return user
 
-@router.patch("/users/{user_id}", response_model=UserRead)
+@router.patch("/{user_id}", response_model=UserRead)
 async def update_user(session: SessionDep, user_id: int, data: UserUpdate):
   user = await session.scalar(select(User).where(User.id == user_id))
 
@@ -65,7 +67,7 @@ async def update_user(session: SessionDep, user_id: int, data: UserUpdate):
 
   return user
 
-@router.delete("/users/{user_id}", status_code=204)
+@router.delete("/{user_id}", status_code=204)
 async def delete_user(session: SessionDep, user_id: int):
   user = await session.scalar(select(User).where(User.id == user_id))
 

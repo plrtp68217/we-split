@@ -6,7 +6,7 @@ from src.schemas.events import EventRead, EventCreate
 from src.schemas.users import UserRead
 from src.models import Event, EventUser
 
-router = APIRouter()
+router = APIRouter(prefix="/events", tags=["events"])
 
 @router.get("/events/{event_id}", response_model=EventRead)
 async def get_event(session: SessionDep, event_id: int):
@@ -37,6 +37,7 @@ async def create_event(session: SessionDep, data: EventCreate):
 
   session.add(event)
   await session.commit()
+  await session.refresh(event)
 
   return event
 
