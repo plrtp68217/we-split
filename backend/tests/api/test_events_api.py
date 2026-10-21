@@ -3,6 +3,15 @@ from httpx import AsyncClient
 from tests.api.conftest import AddExpense
 
 
+async def test_list_events_newest_first(client: AsyncClient, users: dict[str, int]):
+    for name in ["Trip", "Party"]:
+        await client.post("/events/", json={"name": name, "user_ids": [users["Petya"]]})
+
+    events = (await client.get("/events/")).json()
+
+    assert [event["name"] for event in events] == ["Party", "Trip"]
+
+
 async def test_create_event_with_unknown_user(client: AsyncClient, users: dict[str, int]):
     response = await client.post("/events/", json={"name": "Trip", "user_ids": [users["Petya"], 999]})
 
