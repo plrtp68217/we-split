@@ -19,7 +19,6 @@ class ExpenseRead(BaseModel):
 class ExpenseCreate(BaseModel):
   name: str
   amount: Decimal
-  event_id: int
   payer_id: int
   split_type: Literal["equal", "custom"]
   shares: list[ShareIn] = []

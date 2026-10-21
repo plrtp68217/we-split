@@ -8,7 +8,7 @@ from src.models import Event, EventUser
 
 router = APIRouter(prefix="/events", tags=["events"])
 
-@router.get("/events/{event_id}", response_model=EventRead)
+@router.get("/{event_id}", response_model=EventRead)
 async def get_event(session: SessionDep, event_id: int):
   event = await session.scalar(select(Event).where(Event.id == event_id))
   
@@ -17,7 +17,7 @@ async def get_event(session: SessionDep, event_id: int):
   
   return event
 
-@router.get("/events/{event_id}/users", response_model=list[UserRead])
+@router.get("/{event_id}/users", response_model=list[UserRead])
 async def get_users_in_event(session: SessionDep, event_id: int):
   event = await session.scalar(select(Event).where(Event.id == event_id))
     
@@ -28,7 +28,7 @@ async def get_users_in_event(session: SessionDep, event_id: int):
 
   return users
 
-@router.post("/events", response_model=EventRead)
+@router.post("/", response_model=EventRead)
 async def create_event(session: SessionDep, data: EventCreate):
   event = Event(name=data.name)
 
@@ -41,7 +41,7 @@ async def create_event(session: SessionDep, data: EventCreate):
 
   return event
 
-@router.delete("/events/{event_id}", status_code=204)
+@router.delete("/{event_id}", status_code=204)
 async def delete_event(session: SessionDep, event_id: int):
   event = await session.scalar(select(Event).where(Event.id == event_id))
 
@@ -53,7 +53,7 @@ async def delete_event(session: SessionDep, event_id: int):
 
   return Response(status_code=204)
 
-@router.delete("/events/{event_id}/users/{user_id}", status_code=204)
+@router.delete("/{event_id}/users/{user_id}", status_code=204)
 async def delete_user_in_event(session: SessionDep, event_id: int, user_id: int):
   result = await session.execute(
     select(EventUser).where(

@@ -1,26 +1,62 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from src.api.v1.dependencies import SessionDep
-from src.models import Expense, Event
+from src.models import Expense, Event, Debt, User
 from src.schemas.expenses import ExpenseRead, ExpenseCreate
+from src.services.expenses_service import split_equally
 
-router = APIRouter(prefix="/events", tags=["expenses"])
+router = APIRouter(tags=["expenses"])
 
-@router.get("/{event_id}/users/{user_id}/expenses", response_model=list[ExpenseRead])
-async def get_all_expenses_by_user(session: SessionDep, event_id: int,  user_id: int):
-  result = await session.execute(select(Expense).where(
-    Expense.event_id == event_id,
-    Expense.payer_id == user_id
-  ))
+EXPENSE_LOAD = (
+  selectinload(Expense.payer),
+  selectinload(Expense.debts).selectinload(Debt.debtor),
+)
 
-  expenses = result.scalars().all()
+@router.get("/events/{event_id}/expenses", response_model=list[ExpenseRead])
+async def get_event_expenses(session: SessionDep, event_id: int, payer_id: int | None = None):
+  event = await session.get(Event, event_id)
+
+  if event is None:
+    raise HTTPException(status_code=404, detail="Event not found")
+
+  query = select(Expense).where(Expense.event_id == event_id).options(*EXPENSE_LOAD)
+
+  if payer_id is not None:
+    query = query.where(Expense.payer_id == payer_id)
+
+  expenses = (await session.scalars(query)).all()
 
   return expenses
 
-@router.post("/expenses", response_model=ExpenseRead)
-async def create_expense(session: SessionDep, data: ExpenseCreate):
-  event = (await session.execute(select(Event).where(Event.id == data.event_id))).scalar()
+@router.get("/users/{user_id}/expenses", response_model=list[ExpenseRead])
+async def get_user_expenses(session: SessionDep, user_id: int):
+  user = await session.get(User, user_id)
+
+  if user is None:
+    raise HTTPException(status_code=404, detail="User not found")
+
+  expenses = (await session.scalars(
+    select(Expense).where(Expense.payer_id == user_id).options(*EXPENSE_LOAD)
+  )).all()
+
+  return expenses
+
+@router.get("/expenses/{expense_id}", response_model=ExpenseRead)
+async def get_expense(session: SessionDep, expense_id: int):
+  expense = await session.scalar(
+    select(Expense).where(Expense.id == expense_id).options(*EXPENSE_LOAD)
+  )
+
+  if expense is None:
+    raise HTTPException(status_code=404, detail="Expense not found")
+
+  return expense
+
+@router.post("/events/{event_id}/expenses", response_model=ExpenseRead, status_code=201)
+async def create_expense(session: SessionDep, event_id: int, data: ExpenseCreate):
+  event = await session.get(Event, event_id)
 
   if event is None:
     raise HTTPException(status_code=404, detail="Event not found")
@@ -31,36 +67,32 @@ async def create_expense(session: SessionDep, data: ExpenseCreate):
     raise HTTPException(400, "Payer is not in this event")
 
   if data.split_type == "equal":
-    #TODO add in service function split_equally
-    ...
-  elif data.split_type == "custom":
-    ...
-    #TODO add logic to split custom
+    shares = split_equally(data.amount, member_ids)
   else:
-    raise HTTPException(400, "split_type is not in ['equal', 'custom']")
+    shares = {share.user_id: share.amount for share in data.shares}
 
-  # if data.split_type == "equal":
-  #       shares = split_equally(data.amount, member_ids)
-  # else:
-  #     shares = {s.user_id: s.amount for s in data.shares}
-  #     if any(uid not in member_ids for uid in shares):
-  #         raise HTTPException(400, "Some users are not in this event")
-  #     if sum(shares.values()) != data.amount:
-  #         raise HTTPException(400, "Shares do not add up to the total amount")
-  
+    if any(user_id not in member_ids for user_id in shares):
+      raise HTTPException(400, "Some users are not in this event")
+
+    if sum(shares.values()) != data.amount:
+      raise HTTPException(400, "Shares do not add up to the total amount")
+
   expense = Expense(
     name=data.name,
     amount=data.amount,
-    event_id=data.event_id,
+    event_id=event_id,
     payer_id=data.payer_id
   )
 
-  # for user_id, amount in shares.items():
-  #       if user_id != data.payer_id:
-  #           expense.debts.append(Debt(debtor_id=user_id, amount=amount))
+  for user_id, amount in shares.items():
+    if user_id != data.payer_id:
+      expense.debts.append(Debt(debtor_id=user_id, amount=amount))
 
   session.add(expense)
   await session.commit()
-  await session.refresh(expense)
+
+  expense = (await session.scalars(
+    select(Expense).where(Expense.id == expense.id).options(*EXPENSE_LOAD)
+  )).one()
 
   return expense
