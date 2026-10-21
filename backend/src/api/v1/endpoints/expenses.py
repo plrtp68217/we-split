@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Response
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.api.v1.dependencies import SessionDep
@@ -15,7 +14,7 @@ EXPENSE_LOAD = (
   selectinload(Expense.debts).selectinload(Debt.debtor),
 )
 
-async def load_expense(session: AsyncSession, expense_id: int) -> Expense | None:
+async def load_expense(session: SessionDep, expense_id: int) -> Expense | None:
   # populate_existing перезаписывает объект, уже лежащий в сессии (например, после изменения payer_id)
   return await session.scalar(
     select(Expense)
@@ -24,8 +23,10 @@ async def load_expense(session: AsyncSession, expense_id: int) -> Expense | None
     .execution_options(populate_existing=True)
   )
 
-async def get_member_ids(session: AsyncSession, event_id: int) -> list[int]:
-  # не через event.events_users: событие могло попасть в сессию по цепочке selectin без этой коллекции
+async def get_member_ids(session: SessionDep, event_id: int) -> list[int]:
+  # не через event.events_users: событие могло попасть в сессию по цепочке selectin
+  # (Expense.payer -> User.events_users -> EventUser.event) без этой коллекции,
+  # и обращение к ней вызовет MissingGreenlet
   return list(await session.scalars(select(EventUser.user_id).where(EventUser.event_id == event_id)))
 
 def calculate_debts(data: ExpenseCreate, member_ids: list[int]) -> list[Debt]:
