@@ -3,8 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.api.v1.dependencies import SessionDep
-from src.schemas.debts import DebtRead, DebtUpdate
-from src.models import Debt, Expense
+from src.schemas.debts import DebtRead, DebtUpdate, BalanceRead
+from src.models import Debt, Expense, Event, User
+from src.services.debts_service import net_debts
 
 router = APIRouter(tags=["debts"])
 
@@ -64,3 +65,27 @@ async def update_debt(session: SessionDep, debt_id: int, data: DebtUpdate):
   await session.commit()
 
   return debt
+
+@router.get("/events/{event_id}/balances", response_model=list[BalanceRead])
+async def get_event_balances(session: SessionDep, event_id: int):
+  event = await session.get(Event, event_id)
+
+  if event is None:
+    raise HTTPException(status_code=404, detail="Event not found")
+
+  # кредитор долга — плательщик траты
+  rows = (await session.execute(
+    select(Debt.debtor_id, Expense.payer_id, Debt.amount)
+    .join(Debt.expense)
+    .where(Expense.event_id == event_id, Debt.is_settled.is_(False))
+  )).tuples().all()
+
+  transfers = net_debts(rows)
+
+  user_ids = {t.from_id for t in transfers} | {t.to_id for t in transfers}
+  users = {user.id: user for user in await session.scalars(select(User).where(User.id.in_(user_ids)))}
+
+  return [
+    {"from_user": users[t.from_id], "to_user": users[t.to_id], "amount": t.amount}
+    for t in transfers
+  ]

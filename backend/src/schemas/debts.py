@@ -12,3 +12,8 @@ class DebtRead(BaseModel):
 
 class DebtUpdate(BaseModel):
   is_settled: bool
+
+class BalanceRead(BaseModel):
+  from_user: UserRead
+  to_user: UserRead
+  amount: Decimal
