@@ -1,0 +1,292 @@
+:root {
+  --bg: #f2f4f1;
+  --surface: #ffffff;
+  --ink: #18211d;
+  --muted: #66706a;
+  --line: #dce1dc;
+  --green: #1e6b52;
+  --green-dark: #15513e;
+  --green-soft: #e3efe9;
+  --red: #b5462f;
+  --red-soft: #f7e6e1;
+
+  --radius: 10px;
+  font-family: 'Onest', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 44px;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+a {
+  color: inherit;
+}
+
+/* ---------- раскладка ---------- */
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section h2 {
+  margin-bottom: 16px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 14px;
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- списки ---------- */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+}
+
+.list-row + .list-row {
+  border-top: 1px solid var(--line);
+}
+
+.empty {
+  padding: 28px 18px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+/* ---------- формы ---------- */
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 180px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+
+/* ---------- кнопки ---------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font: inherit;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  background: var(--green);
+  border: 1px solid var(--green);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.button:hover {
+  background: var(--green-dark);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button-quiet {
+  color: var(--ink);
+  background: transparent;
+  border-color: var(--line);
+}
+
+.button-quiet:hover {
+  background: var(--surface);
+}
+
+.button-danger {
+  color: var(--red);
+  background: transparent;
+  border-color: transparent;
+}
+
+.button-danger:hover {
+  background: var(--red-soft);
+}
+
+.button-red {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.button-red:hover {
+  background: #93361f;
+}
+
+.button-small {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+/* ---------- выбор людей (чипы) ---------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chip-selected {
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border-color: var(--green);
+}
+
+.chip-remove {
+  padding: 0 2px;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.chip-remove:hover {
+  color: var(--red);
+}
+
+/* ---------- сообщения ---------- */
+
+.error {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px 64px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

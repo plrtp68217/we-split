@@ -8,6 +8,12 @@ from src.models import Event, EventUser, User, Debt, Expense
 
 router = APIRouter(prefix="/events", tags=["events"])
 
+@router.get("/", response_model=list[EventRead])
+async def get_all_events(session: SessionDep):
+  events = (await session.scalars(select(Event).order_by(Event.id.desc()))).all()
+
+  return events
+
 @router.get("/{event_id}", response_model=EventRead)
 async def get_event(session: SessionDep, event_id: int):
   event = await session.scalar(select(Event).where(Event.id == event_id))
