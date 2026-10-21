@@ -85,7 +85,8 @@ async def create_expense(session: SessionDep, event_id: int, data: ExpenseCreate
   )
 
   for user_id, amount in shares.items():
-    if user_id != data.payer_id:
+    # при делении поровну мелкой суммы доля может округлиться до нуля
+    if user_id != data.payer_id and amount > 0:
       expense.debts.append(Debt(debtor_id=user_id, amount=amount))
 
   session.add(expense)

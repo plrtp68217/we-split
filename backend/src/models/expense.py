@@ -21,7 +21,7 @@ class Expense(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(50))
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    event_id: Mapped[int] = mapped_column(ForeignKey('events.id'))
+    event_id: Mapped[int] = mapped_column(ForeignKey('events.id', ondelete='CASCADE'))
     payer_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
 
     event: Mapped['Event'] = relationship(back_populates='expenses')

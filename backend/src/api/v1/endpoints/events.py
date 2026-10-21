@@ -4,7 +4,7 @@ from sqlalchemy import select
 from src.api.v1.dependencies import SessionDep
 from src.schemas.events import EventRead, EventCreate
 from src.schemas.users import UserRead
-from src.models import Event, EventUser
+from src.models import Event, EventUser, User
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -30,6 +30,12 @@ async def get_users_in_event(session: SessionDep, event_id: int):
 
 @router.post("/", response_model=EventRead)
 async def create_event(session: SessionDep, data: EventCreate):
+  existing_ids = set(await session.scalars(select(User.id).where(User.id.in_(data.user_ids))))
+  missing_ids = set(data.user_ids) - existing_ids
+
+  if missing_ids:
+    raise HTTPException(status_code=400, detail=f"Users not found: {sorted(missing_ids)}")
+
   event = Event(name=data.name)
 
   for user_id in data.user_ids:

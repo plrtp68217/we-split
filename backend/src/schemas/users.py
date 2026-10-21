@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserRead(BaseModel):
@@ -7,9 +7,9 @@ class UserRead(BaseModel):
   email: str
 
 class UserCreate(BaseModel):
-  name: str
+  name: str = Field(min_length=1, max_length=50)
   email: str
 
 class UserUpdate(BaseModel):
-  name: str | None = None
+  name: str | None = Field(default=None, min_length=1, max_length=50)
   email: str | None = None
