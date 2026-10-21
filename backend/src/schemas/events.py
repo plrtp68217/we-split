@@ -15,3 +15,6 @@ class EventCreate(BaseModel):
         if len(set(user_ids)) != len(user_ids):
             raise ValueError("user_ids must be unique")
         return user_ids
+
+class EventUserAdd(BaseModel):
+    user_id: int

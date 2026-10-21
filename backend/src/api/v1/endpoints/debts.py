@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import selectinload
 
 from src.api.v1.dependencies import SessionDep
-from src.schemas.debts import DebtRead, DebtUpdate, BalanceRead
+from src.schemas.debts import DebtRead, DebtUpdate, BalanceRead, SettlementCreate
 from src.models import Debt, Expense, Event, User
 from src.services.debts_service import net_debts
 
@@ -78,7 +78,7 @@ async def get_event_balances(session: SessionDep, event_id: int):
     select(Debt.debtor_id, Expense.payer_id, Debt.amount)
     .join(Debt.expense)
     .where(Expense.event_id == event_id, Debt.is_settled.is_(False))
-  )).tuples().all()
+  )).all()
 
   transfers = net_debts(rows)
 
@@ -89,3 +89,41 @@ async def get_event_balances(session: SessionDep, event_id: int):
     {"from_user": users[t.from_id], "to_user": users[t.to_id], "amount": t.amount}
     for t in transfers
   ]
+
+@router.post("/events/{event_id}/settlements", response_model=list[DebtRead])
+async def settle_debts(session: SessionDep, event_id: int, data: SettlementCreate):
+  event = await session.get(Event, event_id)
+
+  if event is None:
+    raise HTTPException(status_code=404, detail="Event not found")
+
+  # балансы считаются взаимозачётом, поэтому гасим долги пары в обе стороны
+  debts = (await session.scalars(
+    select(Debt)
+    .join(Debt.expense)
+    .where(
+      Expense.event_id == event_id,
+      Debt.is_settled.is_(False),
+      or_(
+        and_(Debt.debtor_id == data.from_user_id, Expense.payer_id == data.to_user_id),
+        and_(Debt.debtor_id == data.to_user_id, Expense.payer_id == data.from_user_id),
+      ),
+    )
+    .options(selectinload(Debt.debtor))
+  )).all()
+
+  if not debts:
+    raise HTTPException(status_code=404, detail="No unsettled debts between these users")
+
+  owed = sum(debt.amount for debt in debts if debt.debtor_id == data.from_user_id) \
+    - sum(debt.amount for debt in debts if debt.debtor_id == data.to_user_id)
+
+  if owed < 0:
+    raise HTTPException(status_code=400, detail="from_user does not owe to_user")
+
+  for debt in debts:
+    debt.is_settled = True
+
+  await session.commit()
+
+  return debts
